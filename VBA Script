@@ -1,0 +1,124 @@
+Sub StockAnalysis()
+    Dim TickerValue As String
+    
+    Dim QuaterlyChange As Integer
+    QuarterlyChange = 0
+    
+    
+    Dim PercentChange As Integer
+    PercentChange = 0
+    
+    Dim TotalStock As Double
+    TotalStock = 0
+    
+    Dim TableRow As Integer
+    TableRow = 2
+    
+    Dim ws As Worksheet
+    
+    Dim TickerCount As Long
+    Dim GreatestInc As Double
+    Dim GreatestDec As Double
+    Dim GreatestVol As Double
+    
+    For Each ws In Worksheets
+        Dim WorksheetName As String
+        WorksheetName = ws.Name
+        'Determine the last row of each worksheet
+        Lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        
+        TickerCount = 2
+        
+        
+        'Add header names to each worksheet
+        ws.Range("I1").EntireColumn.Insert
+        ws.Cells(1, 9).Value = "Ticker"
+        
+        ws.Range("J1").EntireColumn.Insert
+        ws.Cells(1, 10).Value = "Quarterly Change"
+        
+        ws.Range("K1").EntireColumn.Insert
+        ws.Cells(1, 11).Value = "Percent Change"
+        
+        ws.Range("L1").EntireColumn.Insert
+        ws.Cells(1, 12).Value = "Total Stock Volume"
+        
+        ws.Range("N1").EntireColumn.Insert
+        ws.Cells(2, 14).Value = "Greatest % Increase"
+        ws.Cells(3, 14).Value = "Greatest % Decrease"
+        ws.Cells(4, 14).Value = "Greatest Total Volume"
+        
+        ws.Range("O1").EntireColumn.Insert
+        ws.Cells(1, 15).Value = "Ticker"
+        
+        ws.Range("P1").EntireColumn.Insert
+        ws.Cells(1, 16).Value = "Value"
+
+        
+        'Loop through all <ticker>
+        For r = 2 To Lastrow
+            'Searching for unequal values in the <ticker> column
+            If ws.Cells(r + 1, 1).Value <> ws.Cells(r, 1).Value Then
+                TickerValue = ws.Cells(r, 1).Value
+                'Printing Ticker value to table
+                ws.Range("I" & TableRow).Value = TickerValue
+    
+                TotalStock = TotalStock + ws.Cells(r, 7).Value
+                ws.Range("L" & TableRow).Value = TotalStock
+                
+                
+                
+                QuarterlyChange = ws.Cells(r, 6).Value - ws.Cells(r, 3).Value
+                ws.Range("J" & TableRow).Value = QuarterlyChange
+                ws.Range("J" & TableRow).Style = "Currency"
+                
+                'Conditional Formating
+                If ws.Range("J" & TableRow).Value >= CLng(0.0001) Then
+                    ws.Range("J" & TableRow).Interior.ColorIndex = 4
+                ElseIf ws.Range("J" & TableRow).Value < 0 Then
+                    ws.Range("J" & TableRow).Interior.ColorIndex = 3
+                Else
+                    ws.Range("J" & TableRow).Interior.ColorIndex = 0
+                End If
+                
+                'Calculating % Change
+                If ws.Cells(r, 3).Value <> 0 Then
+                    PercentChange = (QuarterlyChange / ws.Cells(r, 3).Value)
+                    ws.Range("K" & TableRow).Value = PercentChange
+                    ws.Range("K" & TableRow).NumberFormat = "0.00%"
+                Else
+                    ws.Range("K" & TableRow).NumberFormat = "0.00%"
+                End If
+                TableRow = TableRow + 1
+                
+                
+                'Resetting values for next loop
+                TotalStock = 0
+            Else
+
+
+                TotalStock = TotalStock + Cells(r, 7).Value
+                
+                TickerCount = TickerCount + 1
+
+                'Resetting values for next loop
+                QuarterlyChange = 0
+                PercentChange = 0
+            End If
+            
+        Next r
+        
+        
+        LastRowI = ws.Cells(Rows.Count, 9).End(xlUp).Row
+                Range("P2") = WorksheetFunction.Max(Range("K1: K" & LastRowI))
+                Range("P3") = WorksheetFunction.Min(Range("K1: K" & LastRowI))
+                Range("P4") = WorksheetFunction.Max(Range("L1:L" & LastRowI))
+                
+                ws.Range("P" & TableRow).NumberFormat = "0.00%"
+         Worksheets(WorksheetName).Columns("A:Z").AutoFit
+    Next ws
+    
+End Sub
+
+
+
